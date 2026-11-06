@@ -4,6 +4,8 @@
 
 Requisitos: macOS, Node ≥ 22.13. Testes: `npm test`. App empacotado: `npm run package`.
 
+📖 **Documentação completa:** pasta [`docs/`](docs/index.md) (site MkDocs; veja [Publicar este site](docs/publicar-site.md)). Licença: [MIT](LICENSE).
+
 Detecta **corrupção silenciosa (bit rot)** nos seus HDs de fotos *antes* que o backup da Backblaze
 (retenção de 1 ano) sobrescreva a última versão boa do arquivo.
 
@@ -136,4 +138,4 @@ test/       testes
 
 
 ## Licença
-Projeto pessoal; sem licença definida (todos os direitos reservados) até que se escolha uma.
+[MIT](LICENSE) © 2026 Bruno Nonogaki.

@@ -4,3 +4,5 @@ node_modules/
 *.db-shm
 .DS_Store
 dist/
+site/
+.venv/
