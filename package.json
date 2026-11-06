@@ -1,0 +1,23 @@
+{
+  "name": "hd_checker",
+  "version": "0.1.0",
+  "description": "Detecta corrupção silenciosa (bit rot) em HDs de fotos antes que o backup perca a versão boa.",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "cli": "node src/cli.js",
+    "test": "node test/run-test.js && node test/concurrency-test.js && node test/health-compare-test.js && node test/jpeg-padding-test.js && node test/holders-test.js && node test/vanish-test.js && node test/removed-test.js && node test/full-test.js && node test/main-smoke.js && node test/ui-smoke.js",
+    "package": "node scripts/package-mac.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "nodemailer": "^10.3.1"
+  },
+  "devDependencies": {
+    "electron": ">=37.0.0",
+    "jsdom": "^25.0.0"
+  }
+}

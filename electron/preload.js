@@ -1,0 +1,38 @@
+'use strict';
+const { contextBridge, ipcRenderer } = require('electron');
+const call = (ch) => (...a) => ipcRenderer.invoke(ch, ...a);
+
+contextBridge.exposeInMainWorld('api', {
+  listVolumes: call('volumes:list'),
+  getConfig: call('config:get'),
+  saveSettings: call('settings:save'),
+  createJob: call('job:create'),
+  saveJob: call('job:save'),
+  deleteJob: call('job:delete'),
+  startScan: call('scan:start'),
+  stopScan: call('scan:stop'),
+  scanStatus: call('scan:status'),
+  backgroundRuns: call('scan:background'),
+  listRuns: call('runs:list'),
+  listEvents: call('events:list'),
+  countEvents: call('events:count'),
+  resolveEvents: call('events:resolve'),
+  resolveBulk: call('events:resolveBulk'),
+  exportCsv: call('events:exportCsv'),
+  reveal: call('shell:reveal'),
+  verifyFs: call('health:verifyFs'),
+  ejectVolume: call('health:eject'),
+  killHolders: (volume, pids) => ipcRenderer.invoke('health:killHolders', volume, pids),
+  listHealth: call('health:list'),
+  startCompare: call('compare:start'),
+  stopCompare: call('compare:stop'),
+  compareStatus: call('compare:status'),
+  testEmail: call('email:test'),
+  backupNow: call('db:backupNow'),
+  pickFolder: call('dialog:pickFolder'),
+  onScanEvent: (cb) => ipcRenderer.on('scan:event', (_e, p) => cb(p)),
+  onScanExit: (cb) => ipcRenderer.on('scan:exit', (_e, p) => cb(p)),
+  onHealthEvent: (cb) => ipcRenderer.on('health:event', (_e, p) => cb(p)),
+  onCompareEvent: (cb) => ipcRenderer.on('compare:event', (_e, p) => cb(p)),
+  onCompareExit: (cb) => ipcRenderer.on('compare:exit', (_e, p) => cb(p)),
+});
