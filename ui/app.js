@@ -351,7 +351,7 @@ async function viewReports(root) {
   const r = state.report;
   const runs = await api.listRuns(60);
   const health = await api.listHealth({ limit: 20 });
-  const vols = [...new Set(state.cfg.jobs.map((j) => j.volume))];
+  const vols = [...new Set([...(await api.listVolumes()).map((v) => v.name), ...state.cfg.jobs.map((j) => j.volume), ...(r.volume ? [r.volume] : [])])];   // inclui discos sem agendamento
   const flt = () => ({ state: r.state, severity: r.severity === 'all' ? null : r.severity, volume: r.volume || null, runId: r.runId, kind: r.kind || null, prefix: r.prefix || null });
   const events = await api.listEvents(flt());
 
