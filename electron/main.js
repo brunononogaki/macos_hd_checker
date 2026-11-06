@@ -109,6 +109,14 @@ ipcMain.handle('volumes:list', async () => {
         stats: dbmod.volumeStats(d, j.volume), jobs: cfg.jobs.filter((x) => x.volume === j.volume).map((x) => x.id) });
     }
   }
+  // Discos desconectados que já têm inventário no banco continuam na lista, mesmo sem job (o inventário não depende do job).
+  const known = d.prepare('SELECT volume FROM files UNION SELECT volume FROM runs').all().map((r) => r.volume).filter(Boolean);
+  for (const name of known) {
+    if (names.has(name)) continue;
+    names.add(name);
+    out.push({ name, path: volumePath(name), offline: true, total: null, used: null, info: null, busy: false,
+      stats: dbmod.volumeStats(d, name), resume: dbmod.resumePoint(d, name), jobs: [] });
+  }
   return out;
 });
 

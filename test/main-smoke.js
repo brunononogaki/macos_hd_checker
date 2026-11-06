@@ -32,6 +32,11 @@ let failed = 0; const ok = (n, c) => { console.log(c ? '  ✔' : '  ✘', n); if
   require('../electron/main.js');
   const vols = await handlers['volumes:list']();
   ok('volumes:list inclui Fotos com estatísticas', vols.length === 1 && vols[0].name === 'Fotos' && vols[0].stats.openErrors === 1 && vols[0].jobs[0] === job.id);
+  { const dx = require('../src/core/db').open(config.dbPath(config.load()));
+    dx.prepare("INSERT INTO files (volume,path,size,mtime_ms,hash,first_seen,last_hashed,status) VALUES ('Antigo','x.jpg',1,1,'h',1,1,'ok')").run(); dx.close();
+    const v2 = await handlers['volumes:list']();
+    ok('disco desconectado com inventário e sem job continua na lista', v2.some((v) => v.name === 'Antigo' && v.offline && v.jobs.length === 0));
+    const dy = require('../src/core/db').open(config.dbPath(config.load())); dy.prepare("DELETE FROM files WHERE volume='Antigo'").run(); dy.close(); }
   const open = await handlers['events:list']({}, { state: 'open' });
   const rot = open.find((e) => e.kind === 'bitrot'), miss = open.find((e) => e.kind === 'missing');
   ok('events:list traz bit rot e arquivo sumido', rot && miss && rot.path === 'a.jpg' && miss.path === 'b.jpg');
