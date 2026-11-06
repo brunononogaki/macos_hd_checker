@@ -9,7 +9,7 @@ window.confirm = () => true;
 const now = Date.now();
 const calls = [];
 const cfg = { jobs: [{ id: 'j1', name: 'Verificação Fotos', volume: 'Fotos', enabled: true, schedule: { type: 'weekly', weekday: 0, hour: 2, minute: 0 }, slicePercent: 12.5, maxMinutes: 480, ignore: ['*.tmp'], validate: true, emailOn: 'issues' }],
-  smtp: { host: 'smtp.gmail.com', port: 587, secure: false, user: 'a@b.com', from: '', to: 'a@b.com', passwordSet: true }, backupDir: null, concurrency: 2,
+  smtp: { host: 'smtp.gmail.com', port: 587, secure: false, user: 'a@b.com', from: '', to: 'a@b.com', passwordSet: true }, backupDir: null,
   resolvedDbPath: '/Users/x/Library/Application Support/hd_checker/inventory.db', volumesRoot: '/Volumes', scheduled: { j1: true }, platform: 'darwin' };
 const ev = [
   { id: 1, volume: 'Fotos', path: '2015/<img src=x onerror=alert(1)>.jpg', kind: 'bitrot', severity: 'error', detail: 'conteúdo mudou', at: now, resolved: 0 },

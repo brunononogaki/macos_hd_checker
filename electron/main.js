@@ -132,7 +132,6 @@ ipcMain.handle('settings:save', (_e, s) => {
   }
   cfg.smtp = smtp;
   if ('backupDir' in s) cfg.backupDir = s.backupDir || null;
-  if ('concurrency' in s) cfg.concurrency = Math.max(1, Math.min(8, Number(s.concurrency) || 2));
   if ('dbPath' in s) cfg.dbPath = s.dbPath || null;
   config.save(cfg);
   return publicConfig();

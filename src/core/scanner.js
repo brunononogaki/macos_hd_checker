@@ -297,7 +297,7 @@ async function runJob({ job, cfg, db, emit = () => {}, signal }) {
     }
 
     let idx = 0;
-    const conc = Math.max(1, Math.min(8, cfg.concurrency || 2));
+    const conc = 2;   // arquivos lidos em paralelo: fixo (em HD externo mecânico, 1–2 é o ideal)
     async function worker() {
       for (;;) {
         if (signal && signal.aborted) return;

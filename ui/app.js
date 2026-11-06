@@ -444,12 +444,11 @@ function viewSettings(root) {
     from: h('input', { type: 'text', value: s.from, placeholder: 'HD Checker <voce@gmail.com>' }),
     to: h('input', { type: 'email', value: s.to, placeholder: 'voce@gmail.com' }),
     backup: h('input', { type: 'text', value: c.backupDir || '' }),
-    conc: h('input', { type: 'number', min: 1, max: 8, value: c.concurrency }),
   };
   const field = (label, input, hint) => h('div', { class: 'field' }, h('label', {}, label), input, hint ? h('div', { class: 'hint' }, hint) : null);
   const collect = () => ({
     smtp: { ...s, host: f.host.value.trim(), port: Number(f.port.value) || 587, secure: f.secure.checked, user: f.user.value.trim(), from: f.from.value.trim(), to: f.to.value.trim() },
-    smtpPassword: f.pass.value || null, backupDir: f.backup.value.trim() || null, concurrency: Number(f.conc.value) || 2,
+    smtpPassword: f.pass.value || null, backupDir: f.backup.value.trim() || null,
   });
   const save = async () => { state.cfg = await api.saveSettings(collect()); f.pass.value = ''; toast('Configurações salvas.'); };
 
@@ -472,7 +471,6 @@ function viewSettings(root) {
         h('button', { class: 'btn', onclick: async () => { const p = await api.pickFolder(); if (p) f.backup.value = p; } }, 'Escolher pasta…'),
         h('button', { class: 'btn', onclick: async () => { await save(); const r = await api.backupNow(); toast(r.ok ? 'Inventário copiado para ' + r.file : r.error, 8000); } }, 'Copiar agora')),
       h('div', { style: 'height:14px' }),
-      field('Arquivos lidos em paralelo', f.conc, 'Em HD externo mecânico, 1 ou 2 é o ideal (leitura sequencial). SSD pode usar mais.'),
       h('div', { class: 'row' }, h('button', { class: 'btn primary', onclick: save }, 'Salvar'))));
 }
 

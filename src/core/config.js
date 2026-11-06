@@ -17,7 +17,6 @@ function defaults() {
     version: 1,
     dbPath: null,        // null => <appDir>/inventory.db
     backupDir: null,     // cópia do inventário após cada execução (pasta coberta pela Backblaze)
-    concurrency: 2,      // arquivos lidos em paralelo (HD externo: 1–2 é o ideal)
     smtp: { host: '', port: 587, secure: false, user: '', from: '', to: '' },
     jobs: [],
   };
