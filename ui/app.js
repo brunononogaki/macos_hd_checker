@@ -241,7 +241,7 @@ async function viewDiscos(root) {
   const vols = await api.listVolumes();
   root.append(
     h('h1', {}, 'Discos'),
-    h('p', { class: 'sub' }, 'Escolha quais HDs monitorar. Para cada disco o app guarda uma "impressão digital" (hash) de cada arquivo e compara nas próximas verificações: se o conteúdo mudar sem você ter editado o arquivo, é corrupção — e você avisa a Backblaze antes de perder a versão boa.'));
+    h('p', { class: 'sub' }, 'Escolha quais HDs monitorar. Para cada disco o app guarda uma "impressão digital" (hash) de cada arquivo e compara nas próximas verificações: se o conteúdo mudar sem você ter editado o arquivo, é corrupção.'));
   if (!vols.length) root.append(h('div', { class: 'note' }, 'Nenhum disco externo encontrado em ' + state.cfg.volumesRoot + '. Conecte os HDs e clique em Atualizar.'));
   const grid = h('div', { class: 'grid' });
   for (const v of vols) {
