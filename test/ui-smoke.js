@@ -129,7 +129,6 @@ const click = (sel, txt) => { const el = [...window.document.querySelectorAll(se
   console.log('Configurações');
   window.document.querySelector('[data-tab=config]').click(); await wait(80);
   ok('mostra SMTP e caminho do banco', window.document.querySelector('input[type=text]').value === 'smtp.gmail.com' && text().includes('inventory.db'));
-  ok('explica por que o banco fica fora do Documents', text().includes('iCloud'));
   click('button', 'Escolher pasta'); await wait(50);
   ok('seletor de pasta preenche o campo', [...window.document.querySelectorAll('input[type=text]')].some((i) => i.value === '/Users/x/bk'));
   click('button', 'Salvar e enviar teste'); await wait(80);

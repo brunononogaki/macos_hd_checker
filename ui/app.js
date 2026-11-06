@@ -467,7 +467,6 @@ function viewSettings(root) {
     h('h2', {}, 'Inventário (banco de dados)'),
     h('div', { class: 'form' },
       h('div', { class: 'kv' }, h('span', {}, 'Local do banco'), h('code', {}, c.resolvedDbPath)),
-      h('p', { class: 'hint' }, 'Fica fora da pasta Documents de propósito: o iCloud pode corromper um SQLite em uso. Para proteger o inventário, o app copia o banco após cada execução para a pasta abaixo — escolha uma pasta que a Backblaze já cubra.'),
       field('Pasta de backup do inventário', f.backup),
       h('div', { class: 'row' },
         h('button', { class: 'btn', onclick: async () => { const p = await api.pickFolder(); if (p) f.backup.value = p; } }, 'Escolher pasta…'),
