@@ -66,7 +66,6 @@ const state = {
   bg: [],           // execuções em segundo plano (agendadas/CLI), lidas do banco
   scans: {},        // jobId -> { phase, plan, progress }   (vários discos podem rodar ao mesmo tempo)
   health: {},       // volume -> { fs: 'running'|null, lastLine }
-  compare: { running: false, phase: '', progress: null, result: null, src: '', dst: '', quick: false },
   report: { severity: 'error', volume: '', runId: null, state: 'open', kind: '', prefix: '' },
 };
 
@@ -97,7 +96,6 @@ function setWindowTitle() {
     parts.push(jobVolume(jobId) + (p && p.bytesTotal ? ' ' + pct(p.bytesDone, p.bytesTotal) + '%' : ''));
   }
   for (const r of state.bg) parts.push(r.volume);
-  if (state.compare.running) parts.push('comparando cópia');
   document.title = parts.length ? 'HD Checker — verificando ' + parts.join(', ') : 'HD Checker';
 }
 
@@ -115,14 +113,6 @@ function renderBanner() {
         h('span', { class: 'muted' }, `em segundo plano (agendada) · ${fmtNum(r.filesDone)} arquivos lidos · ${fmtBytes(r.bytesRead)} · problemas: ${r.issues}`)),
       h('div', { style: 'height:6px' }),
       h('div', { class: 'bar indet' }, h('div', { class: 'fill' }))));
-  }
-  if (state.compare.running) {
-    const p = state.compare.progress;
-    blocks.push(h('div', {},
-      h('div', { class: 'row between' },
-        h('div', {}, h('b', {}, 'Comparando cópia'), ' ', h('span', { class: 'muted' }, p ? `${pct(p.bytesDone, p.bytesTotal)}% · ${fmtNum(p.done)}/${fmtNum(p.total)} arquivos · ${fmtBytes(p.rate)}/s · ${fmtEta(p.etaSec)}` : state.compare.phase)),
-        h('button', { class: 'btn sm danger', onclick: () => api.stopCompare() }, 'Parar')),
-      h('div', { style: 'height:6px' }), bar(p ? pct(p.bytesDone, p.bytesTotal) : 0)));
   }
   setWindowTitle();
   if (!blocks.length) { b.classList.add('hidden'); b.replaceChildren(); return; }
@@ -178,21 +168,6 @@ function handleHealthEvent(ev) {
   else if (ev.type === 'line') hs.lastLine = ev.line;
   else if (ev.type === 'end') { hs.fs = null; if (state.tab === 'discos') show('discos'); }
   renderBanner();
-}
-
-function handleCompareEvent(ev) {
-  const c = state.compare;
-  c.running = true;
-  if (ev.type === 'compare-phase') c.phase = ev.message;
-  else if (ev.type === 'compare-progress') c.progress = ev;
-  else if (ev.type === 'compare-result') c.result = ev.result;
-  renderBanner(); renderCompareStatus();
-}
-
-function handleCompareExit(r) {
-  state.compare.running = false; state.compare.progress = null;
-  if (r.code !== 0 && r.code !== 3 && r.stderr) toast('A comparação terminou com erro: ' + r.stderr.slice(0, 300), 10000);
-  renderBanner(); renderCompareStatus();
 }
 
 async function refreshBadge() {
@@ -457,64 +432,6 @@ async function viewReports(root) {
     }))));
 }
 
-// ---------- Ferramentas ----------
-function renderCompareStatus() {
-  const el = $('#cmp-status');
-  if (!el) return;
-  const c = state.compare;
-  const kids = [];
-  if (c.running) kids.push(h('div', { class: 'note' }, c.progress ? `Comparando… ${pct(c.progress.bytesDone, c.progress.bytesTotal)}% (${fmtNum(c.progress.done)}/${fmtNum(c.progress.total)} arquivos)` : (c.phase || 'Iniciando…')));
-  const r = c.result;
-  if (r && !c.running) {
-    const n = r.counts || { different: 0, missing: 0, extra: 0, errors: 0 };
-    const bad = n.different + n.missing + n.errors;
-    kids.push(
-      bad === 0 && !r.aborted
-        ? h('div', { class: 'empty' }, `✓ Cópia idêntica: ${fmtNum(r.same)} arquivo(s) conferidos${r.quick ? ' pelo tamanho (comparação rápida: não prova o conteúdo)' : ' pelo conteúdo (hash dos dois lados)'}. ` + (r.quick ? '' : 'Agora é seguro apagar a origem, se quiser.'))
-        : h('div', { class: 'note err' }, r.aborted ? 'Comparação interrompida: o resultado abaixo é parcial. ' : '', h('b', {}, 'NÃO apague a origem ainda. '), `${fmtNum(n.different)} diferente(s), ${fmtNum(n.missing)} faltando no destino, ${fmtNum(n.errors)} erro(s) de leitura.`),
-      h('div', { class: 'kv' }, h('span', {}, 'Idênticos'), h('b', {}, fmtNum(r.same))),
-      h('div', { class: 'kv' }, h('span', {}, 'Só existem no destino (ignorado)'), h('b', {}, fmtNum(n.extra))));
-    const list = (title, arr, total, fmt) => {
-      if (!arr || !arr.length) return;
-      kids.push(h('details', {}, h('summary', {}, `${title} (${fmtNum(total)})`),
-        h('pre', { class: 'out' }, arr.slice(0, 300).map(fmt).join('\n') + (total > 300 ? `\n… e mais ${fmtNum(total - 300)}` : ''))));
-    };
-    list('Diferentes', r.different, n.different, (d) => `${d.path}   [${d.reason}${d.reason === 'tamanho diferente' ? `: origem ${d.srcSize} B, destino ${d.dstSize} B` : ''}]`);
-    list('Faltando no destino', r.missing, n.missing, (d) => d.path);
-    list('Erros de leitura', r.errors, n.errors, (d) => `${d.path}   [${d.error}]`);
-  }
-  el.replaceChildren(...kids);
-}
-
-function viewTools(root) {
-  const c = state.compare;
-  const mk = (key, ph) => h('input', { type: 'text', value: c[key], placeholder: ph });
-  const src = mk('src', '/Volumes/CARTAO/DCIM  ou  pasta de origem');
-  const dst = mk('dst', '/Volumes/Fotos/2026/Minha viagem  ou  pasta de destino');
-  src.addEventListener('input', () => { c.src = src.value; }); dst.addEventListener('input', () => { c.dst = dst.value; });
-  const pick = (input, key) => h('button', { class: 'btn', onclick: async () => { const p = await api.pickFolder({ defaultPath: state.cfg.volumesRoot }); if (p) { input.value = p; c[key] = p; } } }, 'Escolher…');
-  const quick = h('input', { type: 'checkbox', checked: c.quick });
-  quick.addEventListener('change', () => { c.quick = quick.checked; });
-  root.append(
-    h('h1', {}, 'Ferramentas'),
-    h('h2', {}, 'Comparar cópia (origem × destino)'),
-    h('div', { class: 'form' },
-      h('p', { class: 'sub' }, 'Depois de copiar fotos de um cartão ou de outro HD, confirme que a cópia é idêntica antes de apagar a origem. O app lê as duas pastas por inteiro e compara o hash de cada arquivo. Só lê: não altera nada em nenhum dos lados.'),
-      h('div', { class: 'field' }, h('label', {}, 'Origem'), h('div', { class: 'row' }, src, pick(src, 'src'))),
-      h('div', { class: 'field' }, h('label', {}, 'Destino'), h('div', { class: 'row' }, dst, pick(dst, 'dst'))),
-      h('div', { class: 'field' }, h('div', { class: 'check' }, quick, h('div', {}, h('b', {}, 'Comparação rápida'), h('div', { class: 'hint' }, 'Só confere se o arquivo existe e tem o mesmo tamanho. Pega arquivos que faltaram ou foram truncados, mas NÃO um bit alterado. Use a completa para decidir apagar a origem.')))),
-      h('div', { class: 'row' },
-        h('button', { class: 'btn primary', onclick: async () => {
-          c.result = null;
-          const r = await api.startCompare({ src: c.src.trim(), dst: c.dst.trim(), quick: c.quick });
-          if (!r.ok) { toast(r.error, 7000); return; }
-          c.running = true; c.phase = 'Iniciando…'; c.progress = null; renderBanner(); renderCompareStatus();
-        } }, 'Comparar'),
-        h('button', { class: 'btn danger', onclick: () => api.stopCompare() }, 'Parar'))),
-    h('div', { id: 'cmp-status', class: 'stack', style: 'margin-top:14px' }));
-  renderCompareStatus();
-}
-
 // ---------- Configurações ----------
 function viewSettings(root) {
   const c = state.cfg, s = c.smtp;
@@ -571,7 +488,6 @@ async function show(tab) {
     if (tab === 'discos') await viewDiscos(root);
     else if (tab === 'jobs') viewJobs(root);
     else if (tab === 'relatorios') await viewReports(root);
-    else if (tab === 'ferramentas') viewTools(root);
     else viewSettings(root);
   } catch (e) { root.append(h('div', { class: 'note err' }, 'Erro: ' + e.message)); }
   if (state.tab === tab) $('#view').replaceChildren(root);
@@ -586,13 +502,10 @@ document.querySelectorAll('#nav button').forEach((b) => b.addEventListener('clic
 api.onScanEvent(handleScanEvent);
 api.onScanExit(handleScanExit);
 api.onHealthEvent(handleHealthEvent);
-api.onCompareEvent(handleCompareEvent);
-api.onCompareExit(handleCompareExit);
 api.scanStatus().then((list) => {
   (list || []).forEach((x) => { state.scans[x.jobId] = { phase: 'Em andamento…', plan: null, progress: null }; });
   renderBanner();
 });
-api.compareStatus().then((c) => { if (c && c.running) { state.compare.running = true; state.compare.phase = 'Em andamento…'; renderBanner(); } });
 show('discos');
 
 // Execuções agendadas rodam em outro processo: consulta o banco a cada poucos segundos para mostrá-las no topo.

@@ -61,8 +61,6 @@ let failed = 0; const ok = (n, c) => { console.log(c ? '  ✔' : '  ✘', n); if
   ok('events:count devolve o total sem limite', (await handlers['events:count']({}, { state: 'all' })) >= 2);
   const stt = await handlers['scan:status'](); ok('scan:status devolve lista vazia sem varreduras', Array.isArray(stt) && stt.length === 0);
   const hl = await handlers['health:list']({}, { limit: 5 }); ok('health:list responde lista', Array.isArray(hl));
-  const cs = await handlers['compare:status'](); ok('compare:status parado', cs && cs.running === false);
-  const cbad = await handlers['compare:start']({}, { src: '', dst: '' }); ok('compare:start recusa pastas vazias', cbad && cbad.ok === false);
   const dbm = require('../src/core/db'), dbx = dbm.open(config.dbPath(config.load()));
   dbx.prepare("INSERT INTO runs (job_id,job_name,volume,started_at,heartbeat,pid,status,files_hashed,bytes_read) VALUES ('jx','Agendada','Fotos_00',?,?,?,'running',42,1000)").run(Date.now(), Date.now(), process.pid);
   const bg = await handlers['scan:background'](); dbx.prepare("DELETE FROM runs WHERE job_id='jx'").run(); dbx.close();

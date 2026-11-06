@@ -58,23 +58,6 @@ async function main() {
     console.log('E-mail de teste enviado.');
     return 0;
   }
-  if (cmd === 'compare') {
-    const fsx = require('fs');
-    const { compareTrees } = require('./core/compare');
-    const src = opt('src'), dst = opt('dst');
-    if (!src || !dst || !fsx.existsSync(src) || !fsx.existsSync(dst)) { console.error('Uso: compare --src <pasta> --dst <pasta> [--quick] [--json]'); return 2; }
-    const emit = makeEmit();
-    const res = await compareTrees({ src, dst, quick: flag('quick'), signal: ctrl.signal, onProgress: (ev) => {
-      if (json) process.stdout.write(JSON.stringify({ ...ev, type: ev.type === 'progress' ? 'compare-progress' : 'compare-phase' }) + '\n');
-      else if (ev.type === 'phase') console.log(ev.message);
-    } });
-    const cap = (a) => a.slice(0, 2000);
-    const out = { ...res, different: cap(res.different), missing: cap(res.missing), extra: cap(res.extra), errors: cap(res.errors),
-      counts: { different: res.different.length, missing: res.missing.length, extra: res.extra.length, errors: res.errors.length } };
-    if (json) process.stdout.write(JSON.stringify({ type: 'compare-result', result: out }) + '\n');
-    else console.log(JSON.stringify({ ...out.counts, same: res.same, srcFiles: res.srcFiles, dstFiles: res.dstFiles }, null, 2));
-    return res.different.length || res.missing.length || res.errors.length ? 3 : 0;
-  }
   if (cmd === 'run' || cmd === 'run-all') {
     const jobs = cmd === 'run-all' ? cfg.jobs : cfg.jobs.filter((j) => j.id === opt('job') || j.name === opt('job'));
     if (!jobs.length) { console.error('Job não encontrado.'); return 2; }
@@ -97,7 +80,7 @@ async function main() {
     }
     return code;
   }
-  console.error('Comandos: run --job <id> [--full [--resume] | --only-new] | run-all | compare --src <pasta> --dst <pasta> | status | volumes | test-email');
+  console.error('Comandos: run --job <id> [--full [--resume] | --only-new] | run-all | status | volumes | test-email');
   return 2;
 }
 

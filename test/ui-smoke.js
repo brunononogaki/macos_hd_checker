@@ -38,9 +38,7 @@ window.api = {
   ejectVolume: async (v) => { calls.push(['eject', v]); if (window.__busy && !window.__ejectedAfterKill) return { ok: false, busy: true, error: 'busy', holders: [{ pid: 724, label: 'Pré-visualização (Quick Look)', files: 1, killable: true }, { pid: 77, label: 'Spotlight (indexação)', files: 9, killable: false }] }; return { ok: true }; },
   killHolders: async (v, pids) => { calls.push(['killHolders', v, pids]); window.__ejectedAfterKill = true; return { ok: true, termed: pids, failed: [], remaining: [], skipped: [] }; },
   listHealth: async () => [{ id: 1, volume: 'Fotos', kind: 'fs', at: now, status: 'ok', summary: 'O volume parece estar OK.', output: 'Checking file system\nThe volume appears to be OK' }],
-  startCompare: async (a) => { calls.push(['startCompare', a]); return { ok: true }; },
-  stopCompare: async () => true, compareStatus: async () => ({ running: false }),
-  onHealthEvent: (cb) => { window.__healthCb = cb; }, onCompareEvent: (cb) => { window.__cmpCb = cb; }, onCompareExit: (cb) => { window.__cmpExit = cb; },
+  onHealthEvent: (cb) => { window.__healthCb = cb; },
   onScanEvent: (cb) => { window.__scanCb = cb; }, onScanExit: (cb) => { window.__exitCb = cb; },
 };
 let failed = 0;
@@ -128,22 +126,6 @@ const click = (sel, txt) => { const el = [...window.document.querySelectorAll(se
   click('button', 'Verificação das mudanças'); await wait(80);
   ok('"Verificação das mudanças" inicia com onlyNew', calls.some((c) => c[0] === 'startScan' && c[1] === 'j1' && c[2] && c[2].onlyNew === true));
   window.__exitCb({ jobId: 'j1', code: 0 }); await wait(50);
-  console.log('Ferramentas');
-  window.document.querySelector('[data-tab=ferramentas]').click(); await wait(80);
-  ok('aba Ferramentas renderiza', text().includes('Comparar cópia'));
-  const ins = [...window.document.querySelectorAll('#view input[type=text]')];
-  ins[0].value = '/a'; ins[0].dispatchEvent(new window.Event('input')); ins[1].value = '/b'; ins[1].dispatchEvent(new window.Event('input'));
-  click('button', 'Comparar'); await wait(80);
-  ok('comparar envia origem/destino', calls.some((c) => c[0] === 'startCompare' && c[1].src === '/a' && c[1].dst === '/b' && c[1].quick === false));
-  window.__cmpCb({ type: 'compare-progress', done: 5, total: 10, bytesDone: 50, bytesTotal: 100, rate: 1e6, etaSec: 5 });
-  ok('banner mostra comparação em andamento', window.document.querySelector('#banner').textContent.includes('Comparando') && text().includes('50%'));
-  window.__cmpCb({ type: 'compare-result', result: { same: 8, quick: false, aborted: false, counts: { different: 1, missing: 1, extra: 0, errors: 0 }, different: [{ path: 'x.jpg', reason: 'conteúdo diferente' }], missing: [{ path: 'y.jpg' }], errors: [] } });
-  window.__cmpExit({ code: 3 }); await wait(50);
-  ok('resultado com diferenças alerta para NÃO apagar a origem', text().includes('NÃO apague') && text().includes('x.jpg') && text().includes('y.jpg'));
-  ok('banner some ao fim da comparação', window.document.querySelector('#banner').classList.contains('hidden'));
-  window.__cmpCb({ type: 'compare-result', result: { same: 10, quick: false, aborted: false, counts: { different: 0, missing: 0, extra: 0, errors: 0 }, different: [], missing: [], errors: [] } });
-  window.__cmpExit({ code: 0 }); await wait(50);
-  ok('cópia idêntica é confirmada', text().includes('Cópia idêntica'));
   console.log('Configurações');
   window.document.querySelector('[data-tab=config]').click(); await wait(80);
   ok('mostra SMTP e caminho do banco', window.document.querySelector('input[type=text]').value === 'smtp.gmail.com' && text().includes('inventory.db'));

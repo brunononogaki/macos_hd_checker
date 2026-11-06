@@ -18,13 +18,12 @@ let win = null;
 let db = null, dbFile = null;
 
 const scans = new Map();          // jobId -> { child, volume }   (um processo por disco, vários em paralelo)
-let compareChild = null;
 
-// Mantém o Mac acordado enquanto houver verificação ou comparação rodando (dormir no meio de uma leitura em exFAT é arriscado).
+// Mantém o Mac acordado enquanto houver verificação rodando (dormir no meio de uma leitura em exFAT é arriscado).
 let awakeId = null;
 function syncAwake() {
   if (!powerSaveBlocker) return;
-  const need = scans.size > 0 || !!compareChild;
+  const need = scans.size > 0;
   try {
     if (need && awakeId === null) awakeId = powerSaveBlocker.start('prevent-app-suspension');
     else if (!need && awakeId !== null) { powerSaveBlocker.stop(awakeId); awakeId = null; }
@@ -343,21 +342,6 @@ ipcMain.handle('health:killHolders', async (_e, volume, pids) => {
 
 ipcMain.handle('health:list', (_e, opts = {}) => dbmod.listHealth(getDb(), opts));
 
-// ---------- Comparação origem × destino ----------
-ipcMain.handle('compare:start', (_e, { src, dst, quick }) => {
-  if (compareChild) return { ok: false, error: 'Já existe uma comparação em andamento.' };
-  if (!src || !dst) return { ok: false, error: 'Escolha a pasta de origem e a de destino.' };
-  const args = ['compare', '--src', src, '--dst', dst, '--json'];
-  if (quick) args.push('--quick');
-  compareChild = spawnCli(args, 'compare', {
-    onLine: (ev) => send('compare:event', ev),
-    onExit: (r) => { compareChild = null; syncAwake(); send('compare:exit', r); },   // código 3 = achou diferenças (não é erro)
-  });
-  return { ok: true };
-});
-ipcMain.handle('compare:stop', () => { if (compareChild) compareChild.kill('SIGTERM'); return true; });
-ipcMain.handle('compare:status', () => ({ running: !!compareChild }));
-
 // ---------- E-mail, backup, utilidades ----------
 ipcMain.handle('email:test', () => new Promise((resolve) => {
   execFile(process.execPath, [CLI, 'test-email'], { env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, timeout: 30000 }, (err, stdout, stderr) => {
@@ -409,5 +393,4 @@ app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(
 // Sair do app (Cmd+Q) para tudo com segurança; o que já foi lido fica salvo e a próxima execução continua.
 app.on('before-quit', () => {
   scans.forEach((s) => { try { s.child.kill('SIGTERM'); } catch (e) { /* ok */ } });
-  if (compareChild) { try { compareChild.kill('SIGTERM'); } catch (e) { /* ok */ } }
 });

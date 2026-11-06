@@ -99,10 +99,6 @@ Fechar a janela no macOS **não** interrompe as verificações; só "Sair" (⌘Q
 - **Verificação das mudanças**: lê apenas arquivos novos ou alterados (e os que já têm erro aberto); use logo depois de copiar fotos para o disco.
 - **Agendamento**: abre o job do disco. Frequência, dia, horário, fatia por execução e limite de duração só valem para a execução agendada.
 
-## Ferramentas → Comparar cópia
-
-Compara uma pasta de origem com uma de destino (cartão → HD, HD → HD) arquivo a arquivo, por hash. Só lê. Se o resultado não for "cópia idêntica", **não apague a origem**. A comparação rápida confere só existência e tamanho: pega arquivo faltando ou truncado, mas não um bit alterado.
-
 ## Linha de comando (opcional)
 ```bash
 npm run cli -- run --job <id>      # roda como agendado (fatia e limite do job; use --json para saída em JSON, --no-email)
@@ -110,7 +106,6 @@ npm run cli -- run --job <id> --full       # 100% do disco, sem limite de horár
 npm run cli -- run --job <id> --full --resume   # continua a verificação completa interrompida
 npm run cli -- run --job <id> --only-new   # só arquivos novos/alterados
 npm run cli -- run-all
-npm run cli -- compare --src <pasta> --dst <pasta> [--quick]   # sai com código 3 se houver diferenças
 npm run cli -- status              # cobertura e problemas por disco
 npm run cli -- volumes
 npm run cli -- test-email

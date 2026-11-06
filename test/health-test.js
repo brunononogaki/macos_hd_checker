@@ -1,6 +1,6 @@
 'use strict';
 // Parsers de saúde do disco (com saídas de exemplo do diskutil), estatísticas no banco,
-// comparação origem × destino e a verificação rápida "só novidades" (via CLI).
+// e a verificação rápida "só novidades" (via CLI).
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -15,7 +15,6 @@ const CLI = path.join(__dirname, '..', 'src', 'cli.js');
 const dc = require('../src/core/diskcheck');
 const dbmod = require('../src/core/db');
 const config = require('../src/core/config');
-const { compareTrees } = require('../src/core/compare');
 
 let ok = 0;
 const check = (name, fn) => { try { fn(); console.log('  ✔', name); ok++; } catch (e) { console.error('  ✘', name, '\n    ', e.message); process.exitCode = 1; } };
@@ -62,30 +61,6 @@ const cli = (...a) => spawnSync(process.execPath, [CLI, ...a], { env, encoding: 
   const rfull = cli('run', '--job', 'jf', '--json', '--no-email');
   const done2 = rfull.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l)).find((e) => e.type === 'done');
   check('a execução completa continua lendo tudo (fatia 100%)', () => assert.strictEqual(done2.stats.hashed, 9));
-
-  console.log('Comparação origem × destino');
-  const S = path.join(tmp, 'origem'), D = path.join(tmp, 'destino');
-  for (let i = 0; i < 6; i++) { const buf = crypto.randomBytes(8000); fs.mkdirSync(path.join(S, 'sub'), { recursive: true }); fs.mkdirSync(path.join(D, 'sub'), { recursive: true }); fs.writeFileSync(path.join(S, 'sub', `f${i}.jpg`), buf); fs.writeFileSync(path.join(D, 'sub', `f${i}.jpg`), buf); }
-  fs.writeFileSync(path.join(D, 'sub', 'f1.jpg'), fs.readFileSync(path.join(S, 'sub', 'f1.jpg')).subarray(0, 4000));            // truncado
-  const flip = fs.readFileSync(path.join(D, 'sub', 'f2.jpg')); flip[100] ^= 1; fs.writeFileSync(path.join(D, 'sub', 'f2.jpg'), flip);   // 1 bit
-  fs.unlinkSync(path.join(D, 'sub', 'f3.jpg'));                                                                                            // faltando
-  fs.writeFileSync(path.join(D, 'so_no_destino.txt'), 'x');                                                                              // extra
-  fs.writeFileSync(path.join(S, '.DS_Store'), 'lixo');
-  const full = await compareTrees({ src: S, dst: D });
-  check('acha o arquivo truncado (tamanho)', () => assert(full.different.some((d) => d.path === 'sub/f1.jpg' && d.reason === 'tamanho diferente')));
-  check('acha 1 bit invertido (mesmo tamanho, hash diferente)', () => assert(full.different.some((d) => d.path === 'sub/f2.jpg' && d.reason === 'conteúdo diferente')));
-  check('acha o arquivo que faltou copiar', () => assert.deepStrictEqual(full.missing.map((m) => m.path), ['sub/f3.jpg']));
-  check('lista o que só existe no destino', () => assert.deepStrictEqual(full.extra.map((m) => m.path), ['so_no_destino.txt']));
-  check('3 arquivos idênticos; .DS_Store ignorado', () => assert.strictEqual(full.same, 3));
-  const quick = await compareTrees({ src: S, dst: D, quick: true });
-  check('modo rápido pega tamanho/faltando mas NÃO o bit invertido', () => { assert.strictEqual(quick.different.length, 1); assert.strictEqual(quick.missing.length, 1); assert.strictEqual(quick.same, 4); });
-  const c = cli('compare', '--src', S, '--dst', D, '--json');
-  const lines = c.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l));
-  check('CLI compare: resultado em JSON e código de saída 3 quando há diferenças', () => { assert.strictEqual(c.status, 3); const r = lines.find((l) => l.type === 'compare-result').result; assert.strictEqual(r.counts.different, 2); });
-  fs.writeFileSync(path.join(D, 'sub', 'f1.jpg'), fs.readFileSync(path.join(S, 'sub', 'f1.jpg')));
-  fs.writeFileSync(path.join(D, 'sub', 'f2.jpg'), fs.readFileSync(path.join(S, 'sub', 'f2.jpg')));
-  fs.writeFileSync(path.join(D, 'sub', 'f3.jpg'), fs.readFileSync(path.join(S, 'sub', 'f3.jpg')));
-  check('depois de corrigir a cópia, compare dá código 0', () => assert.strictEqual(cli('compare', '--src', S, '--dst', D, '--json').status, 0));
 
   console.log(`\n${ok} verificações OK${process.exitCode ? ' — HÁ FALHAS' : ''}`);
 })().catch((e) => { console.error(e); process.exit(1); });
