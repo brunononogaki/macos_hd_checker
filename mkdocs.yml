@@ -1,0 +1,65 @@
+site_name: HD Checker
+site_description: Detecta corrupção silenciosa (bit rot) nos seus HDs de fotos antes que o backup perca a versão boa.
+site_url: https://SEU-DOMINIO.exemplo/     # troque pelo endereço do site na sua VPS
+repo_url: https://github.com/brunononogaki/macos_hd_checker
+repo_name: brunononogaki/macos_hd_checker
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2026 Bruno Nonogaki — licença MIT
+
+theme:
+  name: material
+  language: pt-BR
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle: { icon: material/weather-night, name: Modo escuro }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle: { icon: material/weather-sunny, name: Modo claro }
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.action.edit
+    - search.highlight
+    - toc.follow
+
+nav:
+  - Início: index.md
+  - Baixar: download.md
+  - Primeiros passos: comecando.md
+  - Como funciona: como-funciona.md
+  - Usando o app:
+      - Discos: uso/discos.md
+      - Agendamentos: uso/agendamentos.md
+      - Relatórios: uso/relatorios.md
+      - Configurações: uso/configuracoes.md
+  - Linha de comando: cli.md
+  - Onde ficam os dados: dados.md
+  - Limitações: limitacoes.md
+  - Perguntas frequentes: faq.md
+  - Contribuir:
+      - Desenvolvimento: contribuir.md
+      - Publicar este site: publicar-site.md
+  - Histórico de versões: changelog.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed: { alternate_style: true }
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
