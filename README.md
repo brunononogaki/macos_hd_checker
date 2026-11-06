@@ -58,6 +58,9 @@ Dica: deixe o job diário até o inventário completar e depois mude para semana
   Se o disco não estiver conectado, a execução é pulada e registrada.
 - O agendamento usa `caffeinate -i` para o Mac não dormir no meio da verificação.
 
+## Versão
+A versão do app (mostrada no rodapé da barra lateral) vem do campo `version` do `package.json` (semver). Aumente-a a cada atualização: `npm version patch|minor|major --no-git-tag-version`.
+
 ## Onde ficam os dados
 | O quê | Onde |
 |---|---|

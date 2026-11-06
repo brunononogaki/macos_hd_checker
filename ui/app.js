@@ -566,6 +566,7 @@ async function show(tab) {
   state.tab = tab;
   document.querySelectorAll('#nav button').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   state.cfg = await api.getConfig();
+  try { const v = await api.appVersion(); const el = document.getElementById('appVersion'); if (el && v) el.textContent = 'Versão ' + v; } catch (e) { /* sem versão */ }
   const root = h('div', {});
   try {
     if (tab === 'discos') await viewDiscos(root);

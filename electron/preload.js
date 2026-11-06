@@ -4,6 +4,7 @@ const call = (ch) => (...a) => ipcRenderer.invoke(ch, ...a);
 
 contextBridge.exposeInMainWorld('api', {
   listVolumes: call('volumes:list'),
+  appVersion: call('app:version'),
   getConfig: call('config:get'),
   saveSettings: call('settings:save'),
   createJob: call('job:create'),

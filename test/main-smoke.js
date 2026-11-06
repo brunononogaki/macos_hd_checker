@@ -76,6 +76,7 @@ let failed = 0; const ok = (n, c) => { console.log(c ? '  ✔' : '  ✘', n); if
   ok('resolveBulk remove o arquivo do inventário', !dbb.prepare("SELECT 1 FROM files WHERE volume='Fotos' AND path='2014/b.jpg'").get());
   const rs = await handlers['events:list']({}, { state: 'resolved', prefix: '2015' }); ok('resolvido registra o motivo', rs.length === 1 && /em lote/.test(rs[0].resolution));
   dbb.prepare("DELETE FROM events WHERE path LIKE '%/%' AND detail='sumiu'").run(); dbb.close();
+  ok('app:version devolve a versão do package.json', (await handlers['app:version']()) === require('../package.json').version);
   const rr = await handlers['runs:list']({}, 10); ok('runs:list', rr.length === 3);
   console.log(failed ? 'FALHAS: ' + failed : '\nmain.js OK'); process.exit(failed ? 1 : 0);
 })().catch((e) => { console.error('ERRO', e); process.exit(1); });

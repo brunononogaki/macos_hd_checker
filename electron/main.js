@@ -113,6 +113,7 @@ ipcMain.handle('volumes:list', async () => {
 });
 
 // ---------- Configuração / jobs ----------
+ipcMain.handle('app:version', () => require('../package.json').version);
 ipcMain.handle('config:get', () => publicConfig());
 
 ipcMain.handle('settings:save', (_e, s) => {

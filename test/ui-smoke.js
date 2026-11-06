@@ -19,6 +19,7 @@ window.api = {
   listVolumes: async () => [
     { name: 'Fotos', total: 8e12, used: 5.1e12, offline: false, jobs: ['j1'], resume: { since: now - 1e7, runs: 2, doneFiles: 74196, doneBytes: 2e11, todoFiles: 20263, todoBytes: 7e11 }, info: { fsType: 'exfat', bus: 'USB', solidState: false }, stats: { files: 300084, bytes: 5e12, never: 12, d30: 40000, d90: 150000, d365: 290000, oldestVerified: now - 9e9, openErrors: 2, openWarnings: 1, lastFsCheck: null, newSinceFsCheck: 0, lastRun: { started_at: now - 1e6, finished_at: now - 5e5, status: 'issues' } } },
     { name: 'Fotos_02', total: 8e12, used: 2e12, offline: false, jobs: [], stats: { files: 0, never: 0, d30: 0, d90: 0, d365: 0, openErrors: 0, openWarnings: 0, lastRun: null } }],
+  appVersion: async () => '1.0.0',
   getConfig: async () => JSON.parse(JSON.stringify(cfg)),
   saveSettings: async (s) => { calls.push(['saveSettings', s]); return cfg; },
   createJob: async (v) => { calls.push(['createJob', v]); const job = { ...cfg.jobs[0], id: 'j2', volume: v, name: 'Verificação ' + v, enabled: false }; cfg.jobs.push(job); cfg.scheduled.j2 = false; return { job, config: cfg }; },
@@ -91,6 +92,7 @@ const click = (sel, txt) => { const el = [...window.document.querySelectorAll(se
   click('button', 'Ignorar'); await wait(80);
   ok('ignorar chama a API', calls.some((c) => c[0] === 'resolveEvents' && c[1].action === 'dismiss'));
   ok('histórico de saúde aparece em Relatórios', text().includes('Saúde dos discos') && text().includes('Sistema de arquivos'));
+  ok('rodapé da barra lateral mostra a versão e não o texto antigo', window.document.querySelector('.side-foot').textContent.trim() === 'Versão 1.0.0' && !text().includes('Nunca altera'));
   console.log('Relatórios: lote por pasta');
   const selKind = [...window.document.querySelectorAll('#view select')].find((x) => [...x.options].some((o) => o.value === 'missing'));
   selKind.value = 'missing'; selKind.dispatchEvent(new window.Event('change')); await wait(80);
