@@ -443,7 +443,7 @@ function viewSettings(root) {
     pass: h('input', { type: 'password', placeholder: s.passwordSet ? '•••••••• (salva no Keychain; deixe vazio para manter)' : 'senha de app' }),
     from: h('input', { type: 'text', value: s.from, placeholder: 'HD Checker <voce@gmail.com>' }),
     to: h('input', { type: 'email', value: s.to, placeholder: 'voce@gmail.com' }),
-    backup: h('input', { type: 'text', value: c.backupDir || '', placeholder: 'Pasta coberta pela Backblaze (ex.: ~/Documents/hd_checker_backup)' }),
+    backup: h('input', { type: 'text', value: c.backupDir || '' }),
     conc: h('input', { type: 'number', min: 1, max: 8, value: c.concurrency }),
   };
   const field = (label, input, hint) => h('div', { class: 'field' }, h('label', {}, label), input, hint ? h('div', { class: 'hint' }, hint) : null);
