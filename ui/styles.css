@@ -97,10 +97,10 @@ details { margin-top: 6px; } summary { cursor: pointer; }
 .card > .row + .row { margin-top: 12px; }
 
 /* botões dos cards de disco: grade com colunas iguais, alinhadas e com respiro entre as linhas */
-.btn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
-.btn-grid > button.btn { width: 100%; min-height: 40px; padding: 8px 12px; text-align: center; white-space: normal; line-height: 1.25; }
+.btn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 190px)); justify-content: start; gap: 12px; align-items: stretch; }
+.btn-grid > button.btn { width: 100%; min-height: 44px; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; white-space: normal; line-height: 1.25; }
 .btn-grid > button.btn.sm { min-height: 34px; padding: 6px 10px; }
-.btn-grid > button.btn:only-child { grid-column: 1 / -1; }
+.btn-grid > button.btn:only-child { grid-column: 1 / 2; }
 .actions { display: grid; row-gap: 14px; margin-top: 18px !important; }
 .actions > .btn-grid { margin: 0 !important; }
 
