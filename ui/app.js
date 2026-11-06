@@ -470,8 +470,7 @@ function viewSettings(root) {
       h('div', { class: 'row' },
         h('button', { class: 'btn', onclick: async () => { const p = await api.pickFolder(); if (p) f.backup.value = p; } }, 'Escolher pasta…'),
         h('button', { class: 'btn', onclick: async () => { await save(); const r = await api.backupNow(); toast(r.ok ? 'Inventário copiado para ' + r.file : r.error, 8000); } }, 'Copiar agora')),
-      h('div', { style: 'height:14px' }),
-      h('div', { class: 'row' }, h('button', { class: 'btn primary', onclick: save }, 'Salvar'))));
+      h('div', { class: 'row', style: 'margin-top:28px' }, h('button', { class: 'btn primary', onclick: save }, 'Salvar'))));
 }
 
 // ---------- navegação ----------
