@@ -40,7 +40,7 @@ Um `ExperimentalWarning` no console é normal.
 
 ### Primeiros passos
 1. **Discos** → "Monitorar este disco" no Fotos (e no Fotos_02).
-2. **Jobs** → ajuste frequência/horário, marque "Executar automaticamente" e salve.
+2. **Agendamentos** → ajuste frequência/horário, marque "Executar automaticamente" e salve.
 3. **Configurações** → SMTP (Gmail: use uma *senha de app*) e a **pasta de backup do inventário**
    (escolha uma pasta que a Backblaze já cubra) → "Salvar e enviar teste".
 4. **Discos** → "Verificação completa" para a primeira catalogação.

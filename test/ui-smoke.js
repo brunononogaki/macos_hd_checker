@@ -59,8 +59,8 @@ const click = (sel, txt) => { const el = [...window.document.querySelectorAll(se
   ok('só o disco com verificação interrompida mostra "Continuar de onde parou"', btnsCount('Continuar de onde parou') === 1);
   const btns = (t) => [...window.document.querySelectorAll('#view button')].filter((b) => b.textContent === t);
   btns('Agendamento')[1].click(); await wait(100);
-  ok('criar job abre a aba Jobs', calls.some((c) => c[0] === 'createJob' && c[1] === 'Fotos_02') && text().includes('Fotos_02'));
-  console.log('Jobs');
+  ok('criar job abre a aba Agendamentos', calls.some((c) => c[0] === 'createJob' && c[1] === 'Fotos_02') && text().includes('Fotos_02'));
+  console.log('Agendamentos');
   click('#view .list button', 'Verificação Fotos'); await wait(80);
   ok('formulário do job renderiza', text().includes('Fatia por execução') && text().includes('Limite de duração'));
   ok('dica de ciclo (12,5% => 8 execuções)', text().includes('8 execuções'));

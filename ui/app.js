@@ -249,7 +249,7 @@ async function viewDiscos(root) {
       v.resume && !scanning && !v.offline ? h('div', { class: 'btn-grid' },
         h('button', { class: 'btn primary', disabled: busy, title: 'Continua a verificação completa interrompida: pula os arquivos que já foram lidos desde que ela começou.', onclick: () => startScanFor(v, { full: true, resume: true }) }, 'Continuar de onde parou')) : null,
       h('div', { class: 'btn-grid' },
-        h('button', { class: v.resume && !scanning ? 'btn' : 'btn primary', disabled: busy || v.offline, title: 'Lê 100% do disco desde o início, sem limite de horário. Independe da configuração do job.', onclick: () => startScanFor(v, { full: true }) }, 'Verificação completa'),
+        h('button', { class: v.resume && !scanning ? 'btn' : 'btn primary', disabled: busy || v.offline, title: 'Lê 100% do disco desde o início, sem limite de horário. Independe do agendamento.', onclick: () => startScanFor(v, { full: true }) }, 'Verificação completa'),
         h('button', { class: 'btn', disabled: busy || v.offline, title: 'Lê só os arquivos novos ou alterados (e os que já deram erro): use logo depois de copiar fotos para o disco.', onclick: () => startScanFor(v, { onlyNew: true }) }, 'Verificação das mudanças'),
         h('button', { class: 'btn', onclick: () => openSchedule(v) }, 'Agendamento')),
       h('div', { class: 'btn-grid' },
@@ -261,17 +261,17 @@ async function viewDiscos(root) {
   root.append(grid, h('div', { class: 'toolbar' }, h('button', { class: 'btn', onclick: () => show('discos') }, 'Atualizar lista')));
 }
 
-// ---------- Jobs ----------
+// ---------- Agendamentos (jobs) ----------
 function viewJobs(root) {
   const jobs = state.cfg.jobs;
   if (!state.selectedJob || !jobs.find((j) => j.id === state.selectedJob)) state.selectedJob = jobs[0] && jobs[0].id;
-  root.append(h('h1', {}, 'Jobs'), h('p', { class: 'sub' }, 'Um job define qual disco verificar, com que frequência e quanto do disco re-verificar a cada execução. Os jobs ativados rodam sozinhos (via launchd do macOS), mesmo com este app fechado.'));
+  root.append(h('h1', {}, 'Agendamentos'), h('p', { class: 'sub' }, 'Cada agendamento define qual disco verificar, com que frequência e quanto do disco re-verificar a cada execução. Os agendamentos ativados rodam sozinhos (via launchd do macOS), mesmo com este app fechado.'));
   const list = h('div', { class: 'list' },
     jobs.map((j) => h('button', { class: j.id === state.selectedJob ? 'active' : '', onclick: () => { state.selectedJob = j.id; show('jobs'); } },
       h('div', {}, h('b', {}, j.name)), h('div', { class: 'muted small' }, j.volume + (state.cfg.scheduled[j.id] ? ' · agendado' : ' · manual')))),
-    h('button', { onclick: async () => { const vols = await api.listVolumes(); const name = (vols[0] && vols[0].name) || 'Fotos'; const r = await api.createJob(name); state.cfg = r.config; state.selectedJob = r.job.id; show('jobs'); } }, '+ Novo job'));
+    h('button', { onclick: async () => { const vols = await api.listVolumes(); const name = (vols[0] && vols[0].name) || 'Fotos'; const r = await api.createJob(name); state.cfg = r.config; state.selectedJob = r.job.id; show('jobs'); } }, '+ Novo agendamento'));
   const job = jobs.find((j) => j.id === state.selectedJob);
-  root.append(h('div', { class: 'split' }, list, job ? jobForm(job) : h('div', { class: 'note' }, 'Crie um job para começar.')));
+  root.append(h('div', { class: 'split' }, list, job ? jobForm(job) : h('div', { class: 'note' }, 'Crie um agendamento para começar.')));
 }
 
 function jobForm(job) {
@@ -337,11 +337,11 @@ function jobForm(job) {
       h('button', { class: 'btn primary', onclick: async () => {
         const j = collect();
         const r = await api.saveJob(j); state.cfg = r.config;
-        toast(r.error || 'Job salvo' + (j.enabled ? ' e agendado.' : '.'), r.error ? 9000 : 4000);
+        toast(r.error || 'Agendamento salvo' + (j.enabled ? ' e agendado.' : '.'), r.error ? 9000 : 4000);
         show('jobs');
       } }, 'Salvar'),
       h('button', { class: 'btn', disabled: isScanning(job.volume) || isFsChecking(job.volume), onclick: async () => { const r = await api.saveJob(collect()); state.cfg = r.config; startScan(job.id, { full: true }); } }, 'Salvar e verificar agora'),
-      h('button', { class: 'btn danger', onclick: async () => { if (!confirm('Excluir o job "' + job.name + '"? (O inventário e os relatórios são mantidos.)')) return; state.cfg = await api.deleteJob(job.id); state.selectedJob = null; show('jobs'); } }, 'Excluir')));
+      h('button', { class: 'btn danger', onclick: async () => { if (!confirm('Excluir o agendamento "' + job.name + '"? (O inventário e os relatórios são mantidos.)')) return; state.cfg = await api.deleteJob(job.id); state.selectedJob = null; show('jobs'); } }, 'Excluir')));
   upd();
   return form;
 }
