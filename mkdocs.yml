@@ -1,6 +1,6 @@
 site_name: HD Checker
 site_description: Detecta corrupção silenciosa (bit rot) nos seus HDs de fotos antes que o backup perca a versão boa.
-site_url: https://SEU-DOMINIO.exemplo/     # troque pelo endereço do site na sua VPS
+site_url: https://hdchecker.brunononogaki.com/
 repo_url: https://github.com/brunononogaki/macos_hd_checker
 repo_name: brunononogaki/macos_hd_checker
 edit_uri: edit/main/docs/
