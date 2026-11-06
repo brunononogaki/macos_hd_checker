@@ -10,6 +10,7 @@ function h(tag, attrs, ...kids) {
     if (v == null || v === false) continue;
     if (k === 'class') el.className = v;
     else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'style') el.style.cssText = v;   // via CSSOM: o atributo style inline é bloqueado pela CSP (style-src 'self')
     else if (k === 'value') el.value = v;
     else if (k === 'checked') el.checked = !!v;
     else el.setAttribute(k, v === true ? '' : v);
