@@ -469,8 +469,14 @@ function viewSettings(root) {
       field('Pasta de backup do inventário', f.backup),
       h('div', { class: 'row' },
         h('button', { class: 'btn', onclick: async () => { const p = await api.pickFolder(); if (p) f.backup.value = p; } }, 'Escolher pasta…'),
-        h('button', { class: 'btn', onclick: async () => { await save(); const r = await api.backupNow(); toast(r.ok ? 'Inventário copiado para ' + r.file : r.error, 8000); } }, 'Copiar agora')),
-      h('div', { class: 'row', style: 'margin-top:28px' }, h('button', { class: 'btn primary', onclick: save }, 'Salvar'))));
+        h('button', { class: 'btn', onclick: async () => {
+          const out = document.getElementById('backupStatus');
+          const say = (msg, bad) => { out.textContent = msg; out.className = 'note' + (bad ? ' err' : ''); out.classList.remove('hidden'); toast(msg, 8000); };
+          try { await save(); say('Copiando o inventário…'); const r = await api.backupNow(); say(r.ok ? 'Inventário copiado para ' + r.file + ' (' + new Date().toLocaleTimeString() + ')' : r.error, !r.ok); }
+          catch (e) { say('Erro ao copiar o inventário: ' + (e && e.message || e), true); }
+        } }, 'Copiar agora')),
+      h('div', { id: 'backupStatus', class: 'note hidden', style: 'margin-top:12px' }),
+      h('div', { class: 'save-row' }, h('button', { class: 'btn primary', onclick: save }, 'Salvar'))));
 }
 
 // ---------- navegação ----------

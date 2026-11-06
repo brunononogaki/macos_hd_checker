@@ -355,11 +355,17 @@ ipcMain.handle('email:test', () => new Promise((resolve) => {
 ipcMain.handle('db:backupNow', () => {
   const cfg = config.load();
   if (!cfg.backupDir) return { ok: false, error: 'Escolha primeiro a pasta de backup do inventário.' };
-  fs.mkdirSync(cfg.backupDir, { recursive: true });
-  const dest = path.join(cfg.backupDir, 'hd_checker_inventory.db');
-  try { fs.unlinkSync(dest); } catch (e) { /* não existia */ }
-  getDb().exec(`VACUUM INTO '${dest.replace(/'/g, "''")}'`);
-  return { ok: true, file: dest };
+  try {
+    fs.mkdirSync(cfg.backupDir, { recursive: true });
+    const dest = path.join(cfg.backupDir, 'hd_checker_inventory.db');
+    const tmpDest = dest + '.tmp';
+    try { fs.unlinkSync(tmpDest); } catch (e) { /* não existia */ }
+    getDb().exec(`VACUUM INTO '${tmpDest.replace(/'/g, "''")}'`);
+    fs.renameSync(tmpDest, dest);
+    return { ok: true, file: dest };
+  } catch (e) {
+    return { ok: false, error: 'Não foi possível copiar o inventário para "' + cfg.backupDir + '": ' + (e.message || e) + (e.code === 'EPERM' || e.code === 'EACCES' ? ' (o macOS pode estar bloqueando o acesso a essa pasta: dê permissão ao app em Ajustes do Sistema → Privacidade e Segurança → Arquivos e Pastas)' : '') };
+  }
 });
 
 ipcMain.handle('dialog:pickFolder', async (_e, opts = {}) => {
