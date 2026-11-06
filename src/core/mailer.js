@@ -54,7 +54,6 @@ function buildMessage(result) {
     const pct = (n) => (coverage.files ? Math.round((n / coverage.files) * 100) : 0);
     lines.push(`Cobertura do inventário: ${pct(coverage.d90)}% verificado nos últimos 90 dias, ${pct(coverage.d365)}% no último ano; ${coverage.never} arquivo(s) ainda sem hash.`);
   }
-  if (result.backupError) lines.push(`Aviso: não consegui copiar o inventário para a pasta de backup: ${result.backupError}`);
   const text = lines.join('\n');
 
   const html = `<div style="font-family:-apple-system,Segoe UI,sans-serif;font-size:14px;color:#222">` +

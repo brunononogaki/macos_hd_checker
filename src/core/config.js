@@ -16,7 +16,6 @@ function defaults() {
   return {
     version: 1,
     dbPath: null,        // null => <appDir>/inventory.db
-    backupDir: null,     // cópia do inventário após cada execução (pasta coberta pela Backblaze)
     smtp: { host: '', port: 587, secure: false, user: '', from: '', to: '' },
     jobs: [],
   };

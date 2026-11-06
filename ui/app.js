@@ -443,12 +443,11 @@ function viewSettings(root) {
     pass: h('input', { type: 'password', placeholder: s.passwordSet ? '•••••••• (salva no Keychain; deixe vazio para manter)' : 'senha de app' }),
     from: h('input', { type: 'text', value: s.from, placeholder: 'HD Checker <voce@gmail.com>' }),
     to: h('input', { type: 'email', value: s.to, placeholder: 'voce@gmail.com' }),
-    backup: h('input', { type: 'text', value: c.backupDir || '' }),
   };
   const field = (label, input, hint) => h('div', { class: 'field' }, h('label', {}, label), input, hint ? h('div', { class: 'hint' }, hint) : null);
   const collect = () => ({
     smtp: { ...s, host: f.host.value.trim(), port: Number(f.port.value) || 587, secure: f.secure.checked, user: f.user.value.trim(), from: f.from.value.trim(), to: f.to.value.trim() },
-    smtpPassword: f.pass.value || null, backupDir: f.backup.value.trim() || null,
+    smtpPassword: f.pass.value || null,
   });
   const save = async () => { state.cfg = await api.saveSettings(collect()); f.pass.value = ''; toast('Configurações salvas.'); };
 
@@ -466,17 +465,7 @@ function viewSettings(root) {
     h('h2', {}, 'Inventário (banco de dados)'),
     h('div', { class: 'form' },
       h('div', { class: 'kv' }, h('span', {}, 'Local do banco'), h('code', {}, c.resolvedDbPath)),
-      field('Pasta de backup do inventário', f.backup),
-      h('div', { class: 'row' },
-        h('button', { class: 'btn', onclick: async () => { const p = await api.pickFolder(); if (p) f.backup.value = p; } }, 'Escolher pasta…'),
-        h('button', { class: 'btn', onclick: async () => {
-          const out = document.getElementById('backupStatus');
-          const say = (msg, bad) => { out.textContent = msg; out.className = 'note' + (bad ? ' err' : ''); out.classList.remove('hidden'); toast(msg, 8000); };
-          try { await save(); say('Copiando o inventário…'); const r = await api.backupNow(); say(r.ok ? 'Inventário copiado para ' + r.file + ' (' + new Date().toLocaleTimeString() + ')' : r.error, !r.ok); }
-          catch (e) { say('Erro ao copiar o inventário: ' + (e && e.message || e), true); }
-        } }, 'Copiar agora')),
-      h('div', { id: 'backupStatus', class: 'note hidden', style: 'margin-top:12px' }),
-      h('div', { class: 'save-row' }, h('button', { class: 'btn primary', onclick: save }, 'Salvar'))));
+      h('div', { class: 'row', style: 'margin-top:16px' }, h('button', { class: 'btn', onclick: async () => { const r = await api.revealDb(); if (r && r.error) toast(r.error, 6000); } }, 'Mostrar no Finder'))));
 }
 
 // ---------- navegação ----------

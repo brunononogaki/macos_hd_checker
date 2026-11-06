@@ -358,22 +358,13 @@ async function runJob({ job, cfg, db, emit = () => {}, signal }) {
   }
 }
 
-// Orquestra: abre banco, roda, copia o inventário para a pasta de backup, manda e-mail.
+// Orquestra: abre banco, roda, manda e-mail.
 async function executeJob({ job, cfg, emit = () => {}, signal, sendEmail = true }) {
   const db = dbmod.open(configmod.dbPath(cfg));
   let result;
   try {
     result = await runJob({ job, cfg, db, emit, signal });
     result.coverage = dbmod.volumeStats(db, job.volume);
-    if (cfg.backupDir && result.status !== 'skipped') {
-      try {
-        fs.mkdirSync(cfg.backupDir, { recursive: true });
-        const dest = path.join(cfg.backupDir, 'hd_checker_inventory.db');
-        try { fs.unlinkSync(dest); } catch (e) { /* não existia */ }
-        db.exec(`VACUUM INTO '${dest.replace(/'/g, "''")}'`);
-        result.backupFile = dest;
-      } catch (e) { result.backupError = e.message; }
-    }
   } finally {
     db.close();
   }

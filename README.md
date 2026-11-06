@@ -41,8 +41,7 @@ Um `ExperimentalWarning` no console é normal.
 ### Primeiros passos
 1. **Discos** → "Monitorar este disco" no Fotos (e no Fotos_02).
 2. **Agendamentos** → ajuste frequência/horário, marque "Executar automaticamente" e salve.
-3. **Configurações** → SMTP (Gmail: use uma *senha de app*) e a **pasta de backup do inventário**
-   (escolha uma pasta que a Backblaze já cubra) → "Salvar e enviar teste".
+3. **Configurações** → SMTP (Gmail: use uma *senha de app*) → "Salvar e enviar teste".
 4. **Discos** → "Verificação completa" para a primeira catalogação.
 
 ### A primeira execução é longa
@@ -70,9 +69,7 @@ A versão do app (mostrada no rodapé da barra lateral) vem do campo `version` d
 | Senha SMTP | Keychain do macOS (serviço `hd_checker_smtp`) |
 | Agendamentos | `~/Library/LaunchAgents/com.hdchecker.job.<id>.plist` |
 
-O banco **não** fica em `Documents` de propósito: o iCloud Drive pode corromper um SQLite em uso.
-Em vez disso, após cada execução o app copia o inventário (`VACUUM INTO`) para a pasta de backup
-configurada, que a Backblaze protege.
+O banco **não** fica em `Documents` de propósito: o iCloud Drive pode corromper um SQLite em uso. Em Configurações → Inventário há um botão "Mostrar no Finder" que abre a pasta do banco.
 
 ## Abrir como aplicativo (ícone no Dock)
 

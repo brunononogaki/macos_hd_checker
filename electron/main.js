@@ -131,7 +131,6 @@ ipcMain.handle('settings:save', (_e, s) => {
     smtp.passwordSet = true;
   }
   cfg.smtp = smtp;
-  if ('backupDir' in s) cfg.backupDir = s.backupDir || null;
   if ('dbPath' in s) cfg.dbPath = s.dbPath || null;
   config.save(cfg);
   return publicConfig();
@@ -341,7 +340,7 @@ ipcMain.handle('health:killHolders', async (_e, volume, pids) => {
 
 ipcMain.handle('health:list', (_e, opts = {}) => dbmod.listHealth(getDb(), opts));
 
-// ---------- E-mail, backup, utilidades ----------
+// ---------- E-mail, utilidades ----------
 ipcMain.handle('email:test', () => new Promise((resolve) => {
   execFile(process.execPath, [CLI, 'test-email'], { env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, timeout: 30000 }, (err, stdout, stderr) => {
     if (err) {
@@ -352,26 +351,12 @@ ipcMain.handle('email:test', () => new Promise((resolve) => {
   });
 }));
 
-ipcMain.handle('db:backupNow', () => {
-  const cfg = config.load();
-  if (!cfg.backupDir) return { ok: false, error: 'Escolha primeiro a pasta de backup do inventário.' };
-  try {
-    fs.mkdirSync(cfg.backupDir, { recursive: true });
-    const dest = path.join(cfg.backupDir, 'hd_checker_inventory.db');
-    const tmpDest = dest + '.tmp';
-    try { fs.unlinkSync(tmpDest); } catch (e) { /* não existia */ }
-    getDb().exec(`VACUUM INTO '${tmpDest.replace(/'/g, "''")}'`);
-    fs.renameSync(tmpDest, dest);
-    return { ok: true, file: dest };
-  } catch (e) {
-    return { ok: false, error: 'Não foi possível copiar o inventário para "' + cfg.backupDir + '": ' + (e.message || e) + (e.code === 'EPERM' || e.code === 'EACCES' ? ' (o macOS pode estar bloqueando o acesso a essa pasta: dê permissão ao app em Ajustes do Sistema → Privacidade e Segurança → Arquivos e Pastas)' : '') };
-  }
+ipcMain.handle('db:reveal', () => {
+  const file = config.dbPath(config.load());
+  if (fs.existsSync(file)) { shell.showItemInFolder(file); return { ok: true }; }
+  return { ok: false, error: 'O arquivo do banco ainda não existe (rode uma verificação primeiro).' };
 });
 
-ipcMain.handle('dialog:pickFolder', async (_e, opts = {}) => {
-  const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ['openDirectory', 'createDirectory'], defaultPath: opts.defaultPath || undefined });
-  return canceled ? null : filePaths[0];
-});
 
 // ---------- ciclo de vida ----------
 app.setName('HD Checker');

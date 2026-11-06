@@ -73,7 +73,7 @@ async function main() {
         if (rp) { runJobDef.resumeSince = rp.since; runJobDef.name = job.name + ' (completa, continuação)'; }
       }
       const res = await executeJob({ job: runJobDef, cfg, emit: makeEmit(), signal: ctrl.signal, sendEmail: !flag('no-email') });
-      if (json) process.stdout.write(JSON.stringify({ type: 'result', status: res.status, emailSent: !!res.emailSent, emailError: res.emailError || null, backupError: res.backupError || null }) + '\n');
+      if (json) process.stdout.write(JSON.stringify({ type: 'result', status: res.status, emailSent: !!res.emailSent, emailError: res.emailError || null }) + '\n');
       else if (res.emailError) console.error('Falha ao enviar e-mail: ' + res.emailError);
       if (res.status === 'error') code = 1;
       if (ctrl.signal.aborted) break;

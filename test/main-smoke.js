@@ -53,9 +53,9 @@ let failed = 0; const ok = (n, c) => { console.log(c ? '  ✔' : '  ✘', n); if
   ok('após "aceitar", nova execução não acusa o a.jpg de novo', res.newIssues.length === 0);
   ok('após "foi apagado de propósito", b.jpg não volta como sumido', !res.newIssues.some((i) => i.path === 'b.jpg'));
   const csv = await handlers['events:exportCsv']({}, { state: 'all' }); ok('exporta CSV', csv.ok && fs.readFileSync(path.join(tmp, 'out.csv'), 'utf8').includes('bitrot'));
-  const s = await handlers['settings:save']({}, { smtp: { host: 'smtp.x.com', user: 'u@x.com', to: 'u@x.com' }, smtpPassword: 'segredo', backupDir: path.join(tmp, 'bk') });
+  const s = await handlers['settings:save']({}, { smtp: { host: 'smtp.x.com', user: 'u@x.com', to: 'u@x.com' }, smtpPassword: 'segredo' });
   ok('settings:save guarda SMTP sem expor a senha no config.json', s.smtp.host === 'smtp.x.com' && s.smtp.passwordSet && !fs.readFileSync(path.join(tmp, 'app/config.json'), 'utf8').includes('segredo'));
-  const b = await handlers['db:backupNow'](); ok('db:backupNow copia o inventário', b.ok && fs.existsSync(b.file));
+  const rv = await handlers['db:reveal'](); ok('db:reveal abre o banco no Finder', rv.ok && shown.pop() === config.dbPath(config.load()));
   const j = await handlers['job:save']({}, { ...job, enabled: true });
   ok('job:save agenda (no Linux avisa que launchd é só macOS)', j.error && /macOS/.test(j.error));
   ok('events:count devolve o total sem limite', (await handlers['events:count']({}, { state: 'all' })) >= 2);

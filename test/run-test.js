@@ -66,7 +66,7 @@ W('._lixo.jpg', rnd(100));
 // ---------- helpers de teste ----------
 const cfg = config.load();
 const job = { ...config.newJob('Fotos'), slicePercent: 100, maxMinutes: 0 };
-cfg.jobs = [job]; cfg.backupDir = path.join(tmp, 'backup'); config.save(cfg);
+cfg.jobs = [job]; config.save(cfg);
 const run = () => executeJob({ job, cfg, sendEmail: false });
 const issueKey = (r) => r.newIssues.map((i) => `${i.kind}:${path.basename(i.path)}`).sort();
 let ok = 0;
@@ -87,7 +87,6 @@ const check = (name, fn) => { try { fn(); console.log('  ✔', name); ok++; } ca
   check('detecta MP4 sem moov', () => assert(k1.includes('estrutura:nomoov.mp4')));
   check('detecta WAV truncado', () => assert(k1.includes('estrutura:trunc.wav')));
   check('NÃO acusa arquivos bons', () => ['ok.jpg', 'ok.png', 'ok.dng', 'ok.mp4', 'ok.wav', 'notas.txt'].forEach((n) => assert(!k1.some((x) => x.endsWith(':' + n)), n)));
-  check('copia o inventário para a pasta de backup', () => assert(fs.existsSync(path.join(tmp, 'backup/hd_checker_inventory.db'))));
 
   console.log('Execução 2 (nada mudou)');
   const r2 = await run();

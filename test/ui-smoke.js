@@ -9,7 +9,7 @@ window.confirm = () => true;
 const now = Date.now();
 const calls = [];
 const cfg = { jobs: [{ id: 'j1', name: 'Verificação Fotos', volume: 'Fotos', enabled: true, schedule: { type: 'weekly', weekday: 0, hour: 2, minute: 0 }, slicePercent: 12.5, maxMinutes: 480, ignore: ['*.tmp'], validate: true, emailOn: 'issues' }],
-  smtp: { host: 'smtp.gmail.com', port: 587, secure: false, user: 'a@b.com', from: '', to: 'a@b.com', passwordSet: true }, backupDir: null,
+  smtp: { host: 'smtp.gmail.com', port: 587, secure: false, user: 'a@b.com', from: '', to: 'a@b.com', passwordSet: true },
   resolvedDbPath: '/Users/x/Library/Application Support/hd_checker/inventory.db', volumesRoot: '/Volumes', scheduled: { j1: true }, platform: 'darwin' };
 const ev = [
   { id: 1, volume: 'Fotos', path: '2015/<img src=x onerror=alert(1)>.jpg', kind: 'bitrot', severity: 'error', detail: 'conteúdo mudou', at: now, resolved: 0 },
@@ -33,7 +33,7 @@ window.api = {
   resolveBulk: async (x) => { calls.push(['resolveBulk', x]); return { count: 7 }; },
   resolveEvents: async (x) => { calls.push(['resolveEvents', x]); return true; },
   exportCsv: async () => ({ ok: true, count: 3 }), reveal: async () => ({ ok: true }), testEmail: async () => ({ ok: true }),
-  backupNow: async () => ({ ok: true, file: '/x' }), pickFolder: async () => '/Users/x/bk',
+  revealDb: async () => { calls.push(['revealDb']); return { ok: true }; },
   verifyFs: async (v) => { calls.push(['verifyFs', v]); return { ok: true, status: 'ok', summary: 'O volume parece estar OK.' }; },
   ejectVolume: async (v) => { calls.push(['eject', v]); if (window.__busy && !window.__ejectedAfterKill) return { ok: false, busy: true, error: 'busy', holders: [{ pid: 724, label: 'Pré-visualização (Quick Look)', files: 1, killable: true }, { pid: 77, label: 'Spotlight (indexação)', files: 9, killable: false }] }; return { ok: true }; },
   killHolders: async (v, pids) => { calls.push(['killHolders', v, pids]); window.__ejectedAfterKill = true; return { ok: true, termed: pids, failed: [], remaining: [], skipped: [] }; },
@@ -129,10 +129,11 @@ const click = (sel, txt) => { const el = [...window.document.querySelectorAll(se
   console.log('Configurações');
   window.document.querySelector('[data-tab=config]').click(); await wait(80);
   ok('mostra SMTP e caminho do banco', window.document.querySelector('input[type=text]').value === 'smtp.gmail.com' && text().includes('inventory.db'));
-  click('button', 'Escolher pasta'); await wait(50);
-  ok('seletor de pasta preenche o campo', [...window.document.querySelectorAll('input[type=text]')].some((i) => i.value === '/Users/x/bk'));
+  ok('sem opção de backup na tela', !text().includes('Copiar agora') && !text().includes('Pasta de backup'));
+  click('button', 'Mostrar no Finder'); await wait(50);
+  ok('mostrar banco no Finder chama a API', calls.some((c) => c[0] === 'revealDb'));
   click('button', 'Salvar e enviar teste'); await wait(80);
-  ok('salva configurações antes de testar e-mail', calls.some((c) => c[0] === 'saveSettings' && c[1].backupDir === '/Users/x/bk' && c[1].smtp.host === 'smtp.gmail.com'));
+  ok('salva configurações antes de testar e-mail', calls.some((c) => c[0] === 'saveSettings' && c[1].smtp.host === 'smtp.gmail.com'));
   console.log('Progresso da varredura');
   window.__scanCb({ jobId: 'j1', type: 'progress', filesDone: 500, filesTotal: 2000, bytesDone: 2e9, bytesTotal: 8e9, current: '2015/IMG_0001.jpg', rate: 1.2e8, etaSec: 3000, issues: 1 });
   const banner = window.document.querySelector('#banner');
