@@ -385,7 +385,7 @@ async function viewReports(root) {
     root.append(h('div', { class: 'empty' }, r.state === 'open' ? '✓ Nenhum problema aberto com esses filtros.' : 'Nenhum registro com esses filtros.'));
   } else {
     const hasErr = events.some((e) => e.severity === 'error' && !e.resolved);
-    if (hasErr) root.append(h('div', { class: 'note err', style: 'margin-bottom:10px' }, h('b', {}, 'Ação recomendada: '), 'restaure a versão anterior desses arquivos pela Backblaze o quanto antes (a retenção é de 1 ano). Depois de restaurar, rode a verificação: os alertas fecham sozinhos quando o arquivo volta ao normal.'));
+    if (hasErr) root.append(h('div', { class: 'note err', style: 'margin-bottom:10px' }, h('b', {}, 'Ação recomendada: '), 'restaure a versão anterior desses arquivos a partir do seu backup o quanto antes, antes que ele perca a versão boa. Depois de restaurar, rode a verificação: os alertas fecham sozinhos quando o arquivo volta ao normal.'));
     const rows = events.map((e) => {
       const acts = h('div', { class: 'row' });
       if (!e.resolved) {

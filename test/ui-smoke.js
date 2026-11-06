@@ -84,7 +84,7 @@ const click = (sel, txt) => { const el = [...window.document.querySelectorAll(se
   ok('avisos não aparecem no filtro "só erros"', !text().includes('jpeg_sem_EOI'));
   ok('nome de arquivo malicioso NÃO vira HTML (XSS)', !window.document.querySelector('#view img') && text().includes('<img src=x'));
   ok('mostra histórico de execuções', text().includes('Histórico de execuções') && text().includes('1.000 arq'));
-  ok('recomenda restaurar pela Backblaze', text().includes('Backblaze'));
+  ok('recomenda restaurar a partir do backup', text().includes('a partir do seu backup'));
   click('button', 'Aceitar versão atual'); await wait(80);
   ok('aceitar versão chama a API com ação correta', calls.some((c) => c[0] === 'resolveEvents' && c[1].action === 'accept' && c[1].ids[0] === 1));
   click('button', 'Ignorar'); await wait(80);
