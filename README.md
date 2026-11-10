@@ -81,7 +81,7 @@ npm install
 npm run package          # gera dist/HD Checker.app
 ```
 
-Arraste `dist/HD Checker.app` para a pasta Aplicativos. Na primeira vez, clique com o botão direito → Abrir (o app não é assinado pela Apple, só com assinatura local). Como a identidade do app muda, o macOS pede de novo a permissão de "Volumes removíveis"; aceite. Se mover o app ou gerar uma versão nova, os agendamentos são reapontados sozinhos ao abrir (nunca durante uma verificação). Depois de atualizar o código, rode `npm run package` de novo e substitua o app. Se o macOS reclamar que o app está danificado: `xattr -cr "/Applications/HD Checker.app"`.
+Arraste `dist/HD Checker.app` para a pasta Aplicativos. Na primeira vez, clique com o botão direito → Abrir (o app não é assinado pela Apple, só com assinatura local). Como a identidade do app muda, o macOS pede de novo a permissão de "Volumes removíveis"; aceite. Se mover o app ou gerar uma versão nova, os agendamentos são reapontados sozinhos ao abrir (nunca durante uma verificação). Depois de atualizar o código, rode `npm run package` de novo e substitua o app. Se o macOS reclamar que o app está danificado: `/usr/bin/xattr -cr "/Applications/HD Checker.app"`.
 
 ## Vários discos ao mesmo tempo
 

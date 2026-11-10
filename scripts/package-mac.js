@@ -54,7 +54,7 @@ for (const m of need) {
 if (process.platform === 'darwin') {
   try { execFileSync('codesign', ['--force', '--deep', '--sign', '-', dest], { stdio: 'inherit' }); }
   catch (e) { console.error('Aviso: codesign falhou; se o app não abrir, rode: codesign --force --deep --sign - "' + dest + '"'); }
-  try { execFileSync('xattr', ['-cr', dest]); } catch (e) { /* ok */ }
+  try { execFileSync('/usr/bin/xattr', ['-cr', dest]); } catch (e) { /* ok */ }
 }
 console.log('Pronto: ' + dest);
 if (process.platform === 'darwin') console.log('Arraste para a pasta Aplicativos. Na primeira vez: clique com o botão direito → Abrir.');

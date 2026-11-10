@@ -23,8 +23,10 @@ O app é de código aberto e **não é assinado** com um certificado pago da App
 2. Se aparecer "o app está danificado e não pode ser aberto", rode no Terminal:
 
    ```bash
-   xattr -cr "/Applications/HD Checker.app"
+   /usr/bin/xattr -cr "/Applications/HD Checker.app"
    ```
+
+   Use o caminho completo `/usr/bin/xattr`: se você tem Python instalado, outro `xattr` pode vir antes no PATH e não aceita a opção `-r` (erro `option -r not recognized`).
 
 3. Quando o macOS perguntar sobre acesso a **volumes removíveis**, aceite. É assim que o app enxerga seus HDs.
 
