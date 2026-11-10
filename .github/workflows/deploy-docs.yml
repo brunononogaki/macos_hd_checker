@@ -1,0 +1,57 @@
+name: deploy-docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'requirements-docs.txt'
+      - 'Dockerfile.docs'
+      - 'compose.docs.yaml'
+      - 'deploy/**'
+      - '.github/workflows/deploy-docs.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy docs to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Envia só o necessário para buildar o site (não o app Electron inteiro).
+      - name: Stage docs files
+        run: |
+          mkdir -p staging
+          cp -r docs deploy mkdocs.yml requirements-docs.txt Dockerfile.docs compose.docs.yaml staging/
+
+      - name: Sync to server
+        uses: burnett01/rsync-deployments@7.1.0
+        with:
+          switches: -avz --delete
+          path: staging/
+          remote_path: ${{ secrets.DEPLOY_PATH }}
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
+          remote_port: ${{ secrets.DEPLOY_PORT || 22 }}
+
+      - name: Build and restart container
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+            docker compose -f compose.docs.yaml up -d --build --remove-orphans
+            docker image prune -f
+            echo "Deploy do HD Checker docs concluído"
